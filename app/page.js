@@ -39,7 +39,8 @@ export default function CreateKontribute() {
       return
     }
 
-    router.push(`/k/${data.id}`)
+   router.push(`/k/${data.id}/manage?token=${data.creator_token}`)
+
   }
 
   return (
