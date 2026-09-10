@@ -6,6 +6,8 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
+const PLATFORM_FEE_PERCENT = 10
+
 export async function POST(request) {
   const { reference, kontributionId, amount } = await request.json()
 
@@ -34,7 +36,11 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: 'Kontribution not found' }, { status: 404 })
   }
 
-  const newAmountRaised = parseFloat(kontribution.amount_raised) + parseFloat(amount)
+  const grossAmount = parseFloat(amount)
+  const platformFee = grossAmount * (PLATFORM_FEE_PERCENT / 100)
+  const netAmount = grossAmount - platformFee
+
+  const newAmountRaised = parseFloat(kontribution.amount_raised) + netAmount
 
   const { error: updateError } = await supabaseAdmin
     .from('kontributions')
@@ -45,5 +51,5 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: 'Failed to update' }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, newAmountRaised })
+  return NextResponse.json({ success: true, newAmountRaised, platformFee })
 }
