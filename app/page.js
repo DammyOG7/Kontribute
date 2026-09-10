@@ -1,16 +1,45 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '../lib/supabase'
 
 export default function CreateKontribute() {
+  const router = useRouter()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [deadline, setDeadline] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log({ title, description, amount, deadline })
+    setLoading(true)
+    setError('')
+
+    const { data, error } = await supabase
+      .from('kontributions')
+      .insert([
+        {
+          title,
+          description,
+          amount: parseFloat(amount),
+          deadline: deadline || null,
+        },
+      ])
+      .select()
+      .single()
+
+    setLoading(false)
+
+    if (error) {
+      setError('Something went wrong. Try again.')
+      console.error(error)
+      return
+    }
+
+    router.push(`/k/${data.id}`)
   }
 
   return (
@@ -67,11 +96,14 @@ export default function CreateKontribute() {
           />
         </div>
 
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <button
           type="submit"
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition"
+          disabled={loading}
+          className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition"
         >
-          Create Kontribution
+          {loading ? 'Creating...' : 'Create Kontribution'}
         </button>
       </form>
     </main>
