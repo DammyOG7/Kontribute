@@ -8,11 +8,6 @@ export default function KontributionPage({ params }) {
   const [loading, setLoading] = useState(true)
   const [payAmount, setPayAmount] = useState('')
   const [paying, setPaying] = useState(false)
-  const [showWithdraw, setShowWithdraw] = useState(false)
-  const [bankName, setBankName] = useState('')
-  const [accountNumber, setAccountNumber] = useState('')
-  const [accountName, setAccountName] = useState('')
-  const [submittingWithdraw, setSubmittingWithdraw] = useState(false)
 
   const fetchKontribution = async () => {
     const { data } = await supabase
@@ -64,30 +59,6 @@ export default function KontributionPage({ params }) {
     })
 
     handler.openIframe()
-  }
-
-  const handleWithdrawRequest = async (e) => {
-    e.preventDefault()
-    setSubmittingWithdraw(true)
-
-    const res = await fetch('/api/request-withdrawal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        kontributionId: params.id,
-        bankName,
-        accountNumber,
-        accountName,
-      }),
-    })
-
-    const data = await res.json()
-    setSubmittingWithdraw(false)
-
-    if (data.success) {
-      fetchKontribution()
-      setShowWithdraw(false)
-    }
   }
 
   if (loading) {
@@ -151,62 +122,10 @@ export default function KontributionPage({ params }) {
       <button
         onClick={handlePay}
         disabled={paying}
-        className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition mb-6"
+        className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition"
       >
         {paying ? 'Processing...' : 'Kontribute Now'}
       </button>
-
-      <div className="border-t border-gray-800 pt-6">
-        {kontribution.withdrawal_status === 'requested' ? (
-          <p className="text-sm text-gray-400">
-            Withdrawal requested — payout pending. You'll be paid directly to your bank once processed.
-          </p>
-        ) : kontribution.withdrawal_status === 'paid' ? (
-          <p className="text-sm text-green-500">Payout completed ✅</p>
-        ) : !showWithdraw ? (
-          <button
-            onClick={() => setShowWithdraw(true)}
-            className="text-sm text-gray-400 underline"
-          >
-            Are you the creator? Request withdrawal
-          </button>
-        ) : (
-          <form onSubmit={handleWithdrawRequest} className="space-y-3">
-            <p className="text-sm font-semibold">Enter your bank details</p>
-            <input
-              type="text"
-              value={bankName}
-              onChange={(e) => setBankName(e.target.value)}
-              placeholder="Bank name"
-              className="w-full rounded-xl bg-gray-900 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-              required
-            />
-            <input
-              type="text"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
-              placeholder="Account number"
-              className="w-full rounded-xl bg-gray-900 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-              required
-            />
-            <input
-              type="text"
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
-              placeholder="Account name"
-              className="w-full rounded-xl bg-gray-900 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-              required
-            />
-            <button
-              type="submit"
-              disabled={submittingWithdraw}
-              className="w-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition"
-            >
-              {submittingWithdraw ? 'Submitting...' : 'Submit Withdrawal Request'}
-            </button>
-          </form>
-        )}
-      </div>
     </main>
   )
 }
