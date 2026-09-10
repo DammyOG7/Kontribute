@@ -7,7 +7,17 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request) {
-  const { kontributionId, bankName, accountNumber, accountName } = await request.json()
+  const { kontributionId, token, bankName, accountNumber, accountName } = await request.json()
+
+  const { data: kontribution, error: fetchError } = await supabaseAdmin
+    .from('kontributions')
+    .select('creator_token')
+    .eq('id', kontributionId)
+    .single()
+
+  if (fetchError || !kontribution || kontribution.creator_token !== token) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
+  }
 
   const { error } = await supabaseAdmin
     .from('kontributions')
