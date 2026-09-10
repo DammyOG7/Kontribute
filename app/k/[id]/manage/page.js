@@ -107,12 +107,22 @@ export default function ManageKontribution({ params }) {
         />
       </div>
 
-      <div className="mb-8 p-4 rounded-xl bg-gray-900 border border-gray-700">
+         <div className="mb-8 p-4 rounded-xl bg-gray-900 border border-gray-700">
         <p className="text-xs text-gray-500 mb-1">Share this link to collect kontributions:</p>
-        <p className="text-sm text-purple-400 break-all">{publicLink}</p>
+        <p className="text-sm text-purple-400 break-all mb-3">{publicLink}</p>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(publicLink)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+          }}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold py-2 rounded-lg transition"
+        >
+          {copied ? 'Copied! ✓' : 'Copy Link'}
+        </button>
       </div>
 
-      <div className="border-t border-gray-800 pt-6">
+  <div className="border-t border-gray-800 pt-6">
         {kontribution.withdrawal_status === 'requested' ? (
           <p className="text-sm text-gray-400">
             Withdrawal requested — payout pending. You'll be paid directly to your bank once processed.
